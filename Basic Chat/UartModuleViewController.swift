@@ -16,8 +16,12 @@ import CoreBluetooth
 class UartModuleViewController: UIViewController, CBPeripheralManagerDelegate, UITextViewDelegate, UITextFieldDelegate {
     
     //UI
-    @IBOutlet weak var baseTextView: UITextView!
     @IBOutlet weak var scrollView: UIScrollView!
+    
+    @IBOutlet weak var sensorx: UILabel!
+    @IBOutlet weak var sensory: UILabel!
+    @IBOutlet weak var sensorz: UILabel!
+    
     //Data
     var peripheralManager: CBPeripheralManager?
     var peripheral: CBPeripheral!
@@ -28,12 +32,6 @@ class UartModuleViewController: UIViewController, CBPeripheralManagerDelegate, U
         super.viewDidLoad()
         
         self.navigationItem.backBarButtonItem = UIBarButtonItem(title:"Back", style:.plain, target:nil, action:nil)
-        self.baseTextView.delegate = self
-        //Base text view setup
-        self.baseTextView.layer.borderWidth = 3.0
-        self.baseTextView.layer.borderColor = UIColor.blue.cgColor
-        self.baseTextView.layer.cornerRadius = 3.0
-        self.baseTextView.text = ""
 
         
         //Create and start the peripheral manager
@@ -43,7 +41,6 @@ class UartModuleViewController: UIViewController, CBPeripheralManagerDelegate, U
     }
     
     override func viewDidAppear(_ animated: Bool) {
-        self.baseTextView.text = ""
         
         
     }
@@ -59,18 +56,20 @@ class UartModuleViewController: UIViewController, CBPeripheralManagerDelegate, U
     func updateIncomingData () {
         NotificationCenter.default.addObserver(forName: NSNotification.Name(rawValue: "Notify"), object: nil , queue: nil){
             notification in
-            let appendString = "\n"
-            let myFont = UIFont(name: "Helvetica Neue", size: 15.0)
-            let myAttributes2 = [NSFontAttributeName: myFont!, NSForegroundColorAttributeName: UIColor.red]
-            let attribString = NSAttributedString(string: "[Incoming]: " + (characteristicASCIIValue as String) + appendString, attributes: myAttributes2)
-            let newAsciiText = NSMutableAttributedString(attributedString: self.consoleAsciiText!)
-            self.baseTextView.attributedText = NSAttributedString(string: characteristicASCIIValue as String , attributes: myAttributes2)
+
+            let incomingString = characteristicASCIIValue as String
+    
+            let start1 = incomingString.index(incomingString.startIndex, offsetBy: 1)
+            let end1 = incomingString.index(incomingString.startIndex, offsetBy: 7)
+            self.sensorx.text = incomingString[start1..<end1]
+
+            let start2 = incomingString.index(incomingString.startIndex, offsetBy: 7)
+            let end2 = incomingString.index(incomingString.startIndex, offsetBy: 13)
+            self.sensory.text = incomingString[start2..<end2]
             
-            newAsciiText.append(attribString)
-            
-            self.consoleAsciiText = newAsciiText
-            self.baseTextView.attributedText = self.consoleAsciiText
-            
+            let start3 = incomingString.index(incomingString.startIndex, offsetBy: 13)
+            let end3 = incomingString.index(incomingString.startIndex, offsetBy: 19)
+            self.sensorz.text = incomingString[start3..<end3]
         }
     }
     
@@ -95,10 +94,6 @@ class UartModuleViewController: UIViewController, CBPeripheralManagerDelegate, U
     
     //MARK: UITextViewDelegate methods
     func textViewShouldBeginEditing(_ textView: UITextView) -> Bool {
-        if textView === baseTextView {
-            //tapping on consoleview dismisses keyboard
-            return false
-        }
         return true
     }
     
